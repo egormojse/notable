@@ -1,0 +1,50 @@
+[
+    {
+      "id": "note-1",
+      "title": "UI concepts worth existing",
+      "content": "Ideas for improving user interface design and interaction patterns.",
+      "color": "note-pink",
+      "createdAt": "2025-01-15T10:30:00Z",
+      "modifiedAt": "2025-01-15T10:30:00Z"
+    },
+    {
+      "id": "note-2",
+      "title": "Book Review: The Design of Everyday Things by Don Norman",
+      "content": "The Design of Everyday Things is essential reading for anyone who is interested in the relationship between design and usability.",
+      "color": "note-blue",
+      "createdAt": "2025-02-01T14:20:00Z",
+      "modifiedAt": "2025-02-01T14:20:00Z"
+    },
+    {
+      "id": "note-3",
+      "title": "Articles produced by Uxdesign",
+      "content": "List of recent articles from the Uxdesign.cc publication that are worth reading.",
+      "color": "note-green",
+      "createdAt": "2025-02-15T09:45:00Z",
+      "modifiedAt": "2025-02-15T09:45:00Z"
+    },
+    {
+      "id": "note-4",
+      "title": "Mangoes planned to read",
+      "content": "Books and articles about manga and anime art styles to review later.",
+      "color": "note-yellow",
+      "createdAt": "2025-02-20T16:30:00Z",
+      "modifiedAt": "2025-02-20T16:30:00Z"
+    },
+    {
+      "id": "note-5",
+      "title": "Awesome tweets collection",
+      "content": "Collection of inspiring tweets about design, UX, and technology.",
+      "color": "note-blue",
+      "createdAt": "2025-03-01T11:15:00Z",
+      "modifiedAt": "2025-03-01T11:15:00Z"
+    },
+    {
+      "id": "note-6",
+      "title": "List of free & open source tools",
+      "content": "Curated list of free and open-source tools for designers and developers.",
+      "color": "note-pink",
+      "createdAt": "2025-03-10T13:40:00Z",
+      "modifiedAt": "2025-03-10T13:40:00Z"
+    }
+  ]

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Note Editor</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container editor-container">
+        <header class="editor-header">
+            <div class="editor-nav">
+                <span class="material-icons back-btn" id="backBtn">arrow_back</span>
+                <div class="editor-actions">
+                    <span class="material-icons" id="saveNoteBtn">check</span>
+                    <span class="material-icons" id="moreOptionsBtn">more_vert</span>
+                </div>
+            </div>
+        </header>
+        
+        <div class="editor-content">
+            <input type="text" id="noteTitle" placeholder="Title" class="note-title-input">
+            <div class="note-content-area" id="noteContent" contenteditable="true" placeholder="Type something..."></div>
+        </div>
+        
+        <div class="editor-toolbar">
+            <span class="material-icons toolbar-item">format_bold</span>
+            <span class="material-icons toolbar-item">format_italic</span>
+            <span class="material-icons toolbar-item">format_underlined</span>
+            <span class="material-icons toolbar-item">format_list_bulleted</span>
+            <span class="material-icons toolbar-item">format_list_numbered</span>
+            <span class="material-icons toolbar-item" id="translate-btn">translate</span>
+        </div>
+    </div>
+
+    <script src="js/storage.js"></script>
+    <script src="js/editor.js"></script>
+</body>
+</html>

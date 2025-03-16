@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes App</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>NOTABLE</h1>
+        </header>
+        
+        <div class="notes-header">
+            <h2>Notes</h2>
+            <div class="header-icons">
+                <span class="material-icons search-icon">search</span>
+                <span class="material-icons more-icon">more_vert</span>
+            </div>
+        </div>
+        
+        <div class="notes-container" id="notesContainer">
+            <!-- Notes will be dynamically added here -->
+        </div>
+        
+        <div class="add-note-btn" id="addNoteBtn">
+            <span class="material-icons">add</span>
+        </div>
+        
+        <div class="search-overlay" id="searchOverlay">
+            <div class="search-header">
+                <div class="search-input-container">
+                    <span class="material-icons">search</span>
+                    <input type="text" id="searchInput" placeholder="Search notes...">
+                    <span class="material-icons close-search" id="closeSearch">close</span>
+                </div>
+            </div>
+            <div class="search-results" id="searchResults">
+                <!-- Search results will appear here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/storage.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
