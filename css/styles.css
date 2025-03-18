@@ -212,24 +212,25 @@ header h1 {
 
 /* Note with Colors - grayscale variants but softer */
 .note-pink {
-    background-color: #f8f8f8;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    background-color: #ffebee;  /* Light pink */
+    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.1);
 }
 
 .note-blue {
-    background-color: #f1f1f1;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    background-color: #e3f2fd;  /* Light blue */
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.1);
 }
 
 .note-green {
-    background-color: #e6e6e6;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    background-color: #e8f5e9;  /* Light green */
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.1);
 }
 
 .note-yellow {
-    background-color: #dcdcdc;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    background-color: #fffde7;  /* Light yellow */
+    box-shadow: 0 4px 12px rgba(255, 235, 59, 0.1);
 }
+
 
 /* Editor Styles */
 .editor-container {
@@ -371,19 +372,19 @@ header h1 {
 }
 
 .color-pink {
-    background-color: #f8f8f8;
+    background-color: #f48fb1;  /* Pink */
 }
 
 .color-blue {
-    background-color: #f1f1f1;
+    background-color: #90caf9;  /* Blue */
 }
 
 .color-green {
-    background-color: #e6e6e6;
+    background-color: #a5d6a7;  /* Green */
 }
 
 .color-yellow {
-    background-color: #dcdcdc;
+    background-color: #fff59d;  /* Yellow */
 }
 
 /* Delete Confirmation */
@@ -680,23 +681,23 @@ header h1 {
 
 /* Additional color styles - grayscale with soft shadows */
 .dark-mode .note-pink {
-    background-color: #2c2c2e;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    background-color: #4a0015;  /* Dark pink */
+    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.2);
 }
 
 .dark-mode .note-blue {
-    background-color: #242426;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    background-color: #0d47a1;  /* Dark blue */
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
 }
 
 .dark-mode .note-green {
-    background-color: #1e1e20;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    background-color: #1b5e20;  /* Dark green */
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
 }
 
 .dark-mode .note-yellow {
-    background-color: #18181a;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    background-color: #f57f17;  /* Dark yellow/amber */
+    box-shadow: 0 4px 12px rgba(255, 235, 59, 0.2);
 }
 
 /* Accessibility enhancements */
