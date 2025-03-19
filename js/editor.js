@@ -34,6 +34,15 @@ document.addEventListener('DOMContentLoaded', function() {
         setupActiveButtonState();
         initMobileOptimizations(); // Add this line
 
+        // Объект для хранения состояния форматирования
+        const activeFormattingStates = {
+            'bold': false,
+            'italic': false,
+            'underline': false,
+            'insertUnorderedList': false,
+            'insertOrderedList': false
+        };
+
 
         // Установить цвет текста на желтый
         noteContent.style.color = '#FFFF00';
@@ -370,53 +379,72 @@ document.addEventListener('DOMContentLoaded', function() {
     /**
      * Apply active formatting to current selection or cursor position
      */
-    function applyActiveFormattingToSelection() {
-        const selection = window.getSelection();
+    /**
+ * Improved method to apply active formatting to selection
+ * Works better on mobile devices
+ */
+function applyActiveFormattingToSelection() {
+    const selection = window.getSelection();
+    
+    // Only apply if we have formatting active and selection is collapsed (just a cursor)
+    if (selection.rangeCount > 0 && selection.isCollapsed) {
+        const range = selection.getRangeAt(0);
+        const hasActiveFormatting = Object.values(activeFormattingStates).some(state => state);
         
-        // Only apply if we have formatting active and selection is collapsed (just a cursor)
-        if (selection.rangeCount > 0 && selection.isCollapsed) {
-            const range = selection.getRangeAt(0);
-            const hasActiveFormatting = Object.values(activeFormattingStates).some(state => state);
+        // Only continue if we have active formatting
+        if (hasActiveFormatting) {
+            // Create a placeholder for formatting
+            const temp = document.createElement('span');
+            temp.setAttribute('id', 'temp-formatting');
+            temp.textContent = '\u200B'; // Zero-width space
             
-            // Only continue if we have active formatting
-            if (hasActiveFormatting) {
-                // Create a placeholder for formatting
-                const temp = document.createElement('span');
-                temp.setAttribute('id', 'temp-formatting');
-                temp.textContent = '\u200B'; // Zero-width space
-                
-                // Insert the placeholder
-                range.insertNode(temp);
-                
-                // Create a new range that selects the placeholder
-                const tempRange = document.createRange();
-                tempRange.selectNodeContents(temp);
-                selection.removeAllRanges();
-                selection.addRange(tempRange);
-                
-                // Apply each active formatting
-                Object.keys(activeFormattingStates).forEach(cmd => {
-                    if (activeFormattingStates[cmd]) {
-                        document.execCommand(cmd, false, null);
-                    }
-                });
-                
-                // Remove the placeholder but keep the formatting
-                const parent = temp.parentNode;
-                while (temp.firstChild) {
-                    parent.insertBefore(temp.firstChild, temp);
+            // Insert the placeholder
+            range.insertNode(temp);
+            
+            // Create a new range that selects the placeholder
+            const tempRange = document.createRange();
+            tempRange.selectNodeContents(temp);
+            selection.removeAllRanges();
+            selection.addRange(tempRange);
+            
+            // Apply each active formatting
+            Object.keys(activeFormattingStates).forEach(cmd => {
+                if (activeFormattingStates[cmd]) {
+                    document.execCommand(cmd, false, null);
                 }
-                parent.removeChild(temp);
-                
-                // Move cursor to the end of the formatted area
-                const newRange = document.createRange();
-                newRange.setStartAfter(parent.lastChild);
-                newRange.collapse(true);
-                selection.removeAllRanges();
-                selection.addRange(newRange);
+            });
+            
+            // Remove the placeholder but keep the formatting
+            const parent = temp.parentNode;
+            while (temp.firstChild) {
+                parent.insertBefore(temp.firstChild, temp);
             }
+            parent.removeChild(temp);
+            
+            // Move cursor to the end of the formatted area
+            const newRange = document.createRange();
+            newRange.setStartAfter(parent.lastChild);
+            newRange.collapse(true);
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+            
+            // Важное дополнение: заново применяем все активные форматирования 
+            // для следующего символа, который будет введен
+            document.addEventListener('keyup', function onKeyUp(e) {
+                // Применяем форматирование только один раз после ввода
+                document.removeEventListener('keyup', onKeyUp);
+                // Небольшая задержка для корректной работы на мобильных устройствах
+                setTimeout(() => {
+                    Object.keys(activeFormattingStates).forEach(cmd => {
+                        if (activeFormattingStates[cmd]) {
+                            document.execCommand(cmd, false, null);
+                        }
+                    });
+                }, 10);
+            }, { once: true });
         }
     }
+}
 
     function initMobileOptimizations() {
         // Check if device is mobile
@@ -454,22 +482,73 @@ document.addEventListener('DOMContentLoaded', function() {
     /**
      * Handle keyboard visibility changes on mobile
      */
-    function handleKeyboardVisibilityChange() {
-        // This is a simple approach - keyboard visibility changes window height
-        const toolbar = document.querySelector('.formatting-toolbar');
-        const editorContent = document.querySelector('.editor-content');
+    /**
+ * Handle keyboard visibility changes on mobile
+ */
+function handleKeyboardVisibilityChange() {
+    // This is a simple approach - keyboard visibility changes window height
+    const toolbar = document.querySelector('.formatting-toolbar');
+    const editorContent = document.querySelector('.editor-content');
+    
+    // Сохраняем состояние форматирования перед появлением клавиатуры
+    if (window.innerHeight < window.outerHeight * 0.8) {
+        // Сохраняем текущее состояние форматирования для восстановления
+        saveCurrentFormattingState();
         
-        // If keyboard is likely visible (window height decreased significantly)
-        if (window.innerHeight < window.outerHeight * 0.8) {
-            // Adjust UI for keyboard visibility
-            toolbar.classList.add('keyboard-visible');
-            editorContent.classList.add('keyboard-visible');
-        } else {
-            // Restore UI when keyboard is hidden
-            toolbar.classList.remove('keyboard-visible');
-            editorContent.classList.remove('keyboard-visible');
-        }
+        // Adjust UI for keyboard visibility
+        toolbar.classList.add('keyboard-visible');
+        editorContent.classList.add('keyboard-visible');
+        
+        // Добавляем обработчик, который восстановит форматирование после фокуса
+        noteContent.addEventListener('focus', restoreFormattingState, { once: true });
+    } else {
+        // Restore UI when keyboard is hidden
+        toolbar.classList.remove('keyboard-visible');
+        editorContent.classList.remove('keyboard-visible');
     }
+}
+
+/**
+ * Сохраняет текущее состояние форматирования
+ */
+function saveCurrentFormattingState() {
+    // Сохраняем состояние в localStorage или переменной
+    localStorage.setItem('activeFormattingStates', JSON.stringify(activeFormattingStates));
+}
+
+/**
+ * Восстанавливает состояние форматирования после открытия клавиатуры
+ */
+function restoreFormattingState() {
+    // Получаем сохраненное состояние
+    const savedState = localStorage.getItem('activeFormattingStates');
+    if (savedState) {
+        const savedFormattingStates = JSON.parse(savedState);
+        
+        // Восстанавливаем состояние форматирования
+        Object.keys(savedFormattingStates).forEach(cmd => {
+            if (savedFormattingStates[cmd]) {
+                // Применяем форматирование, если оно было активно
+                activeFormattingStates[cmd] = true;
+                
+                // Обновляем внешний вид кнопок
+                const button = document.querySelector(`.toolbar-item[data-command="${cmd}"]`);
+                if (button) {
+                    button.classList.add('active');
+                }
+                
+                // Если курсор находится в редакторе, применяем форматирование
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0 && selection.isCollapsed) {
+                    applyActiveFormattingToSelection();
+                }
+            }
+        });
+    }
+    
+    // Принудительно обновляем состояние панели инструментов
+    updateToolbarState();
+}
     
     /**
      * Handle file attachment
