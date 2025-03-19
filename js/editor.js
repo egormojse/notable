@@ -32,6 +32,8 @@ document.addEventListener('DOMContentLoaded', function() {
         loadNoteData();
         setupAutoSave();
         setupActiveButtonState();
+        initMobileOptimizations(); // Add this line
+
 
         // Установить цвет текста на желтый
         noteContent.style.color = '#FFFF00';
@@ -109,24 +111,142 @@ document.addEventListener('DOMContentLoaded', function() {
      * Update toolbar button states based on current selection formatting
      */
     function updateToolbarState() {
-        // Command states to check
+        // Commands to check
         const commands = ['bold', 'italic', 'underline', 'insertUnorderedList', 'insertOrderedList'];
         
         // Check active states
         commands.forEach(command => {
             const button = document.querySelector(`.toolbar-item[data-command="${command}"]`);
-            const isActive = document.queryCommandState(command);
             
-            if (button) {
-                if (isActive) {
-                    button.classList.add('active');
-                } else {
-                    button.classList.remove('active');
+            try {
+                // Some mobile browsers may have issues with queryCommandState
+                const isActive = document.queryCommandState(command);
+                
+                if (button) {
+                    if (isActive) {
+                        button.classList.add('active');
+                    } else {
+                        button.classList.remove('active');
+                    }
+                }
+                
+                activeFormattingStates[command] = isActive;
+            } catch (e) {
+                console.log('Error checking command state:', e);
+                // Fallback approach - check parent element styling
+                if (button) {
+                    const selection = window.getSelection();
+                    if (selection.rangeCount > 0) {
+                        const range = selection.getRangeAt(0);
+                        const parentElement = range.commonAncestorContainer.nodeType === 3 ? 
+                            range.commonAncestorContainer.parentNode : range.commonAncestorContainer;
+                        
+                        let isActive = false;
+                        
+                        // Check based on common HTML formatting elements
+                        switch(command) {
+                            case 'bold':
+                                isActive = isElementOrParentBold(parentElement);
+                                break;
+                            case 'italic':
+                                isActive = isElementOrParentItalic(parentElement);
+                                break;
+                            case 'underline':
+                                isActive = isElementOrParentUnderlined(parentElement);
+                                break;
+                            case 'insertUnorderedList':
+                                isActive = isElementOrParentUL(parentElement);
+                                break;
+                            case 'insertOrderedList':
+                                isActive = isElementOrParentOL(parentElement);
+                                break;
+                        }
+                        
+                        if (isActive) {
+                            button.classList.add('active');
+                        } else {
+                            button.classList.remove('active');
+                        }
+                        
+                        activeFormattingStates[command] = isActive;
+                    }
                 }
             }
-            
-            activeFormattingStates[command] = isActive;
         });
+    }
+
+    function isElementOrParentBold(element) {
+        if (!element || element === noteContent) return false;
+        
+        const style = window.getComputedStyle(element);
+        if (style.fontWeight === 'bold' || parseInt(style.fontWeight) >= 700) {
+            return true;
+        }
+        
+        if (element.tagName === 'B' || element.tagName === 'STRONG') {
+            return true;
+        }
+        
+        return isElementOrParentBold(element.parentNode);
+    }
+
+    function isElementOrParentItalic(element) {
+        if (!element || element === noteContent) return false;
+        
+        const style = window.getComputedStyle(element);
+        if (style.fontStyle === 'italic') {
+            return true;
+        }
+        
+        if (element.tagName === 'I' || element.tagName === 'EM') {
+            return true;
+        }
+        
+        return isElementOrParentItalic(element.parentNode);
+    }
+    
+    /**
+     * Check if element or any parent is underlined
+     */
+    function isElementOrParentUnderlined(element) {
+        if (!element || element === noteContent) return false;
+        
+        const style = window.getComputedStyle(element);
+        if (style.textDecoration.includes('underline')) {
+            return true;
+        }
+        
+        if (element.tagName === 'U') {
+            return true;
+        }
+        
+        return isElementOrParentUnderlined(element.parentNode);
+    }
+    
+    /**
+     * Check if element or any parent is an unordered list
+     */
+    function isElementOrParentUL(element) {
+        if (!element || element === noteContent) return false;
+        
+        if (element.tagName === 'UL') {
+            return true;
+        }
+        
+        return isElementOrParentUL(element.parentNode);
+    }
+    
+    /**
+     * Check if element or any parent is an ordered list
+     */
+    function isElementOrParentOL(element) {
+        if (!element || element === noteContent) return false;
+        
+        if (element.tagName === 'OL') {
+            return true;
+        }
+        
+        return isElementOrParentOL(element.parentNode);
     }
     
     /**
@@ -151,12 +271,28 @@ document.addEventListener('DOMContentLoaded', function() {
             if (command) {
                 item.setAttribute('data-command', command);
                 
-                item.addEventListener('click', function() {
+                // Function to handle formatting commands
+                const handleFormatting = function(e) {
+                    // Prevent default behavior that might cause focus loss
+                    e.preventDefault();
+                    
                     const cmd = this.getAttribute('data-command');
                     
                     if (cmd === 'handleFileAttachment') {
                         handleFileAttachment();
                     } else {
+                        // Get current selection
+                        const selection = window.getSelection();
+                        let range = null;
+                        
+                        // Save current selection state
+                        if (selection.rangeCount > 0) {
+                            range = selection.getRangeAt(0);
+                        }
+                        
+                        // Focus the content area
+                        noteContent.focus();
+                        
                         // Toggle formatting state
                         activeFormattingStates[cmd] = !activeFormattingStates[cmd];
                         
@@ -171,19 +307,64 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                         
                         // If no text is selected, ensure format continues when typing
-                        const selection = window.getSelection();
                         if (selection.isCollapsed) {
                             applyActiveFormattingToSelection();
                         }
                         
+                        // Make sure content area maintains focus
                         noteContent.focus();
+                        
+                        // Update the toolbar state
+                        updateToolbarState();
                     }
+                };
+                
+                // Add event listeners for both mouse and touch events
+                
+                // Mouse events (desktop)
+                item.addEventListener('click', handleFormatting);
+                
+                // Prevent focus loss without interfering with click handler
+                item.addEventListener('mousedown', function(e) {
+                    e.preventDefault();
+                });
+                
+                // Touch events (mobile)
+                item.addEventListener('touchstart', function(e) {
+                    // Don't prevent default here as it can interfere with tap recognition
+                });
+                
+                item.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    // Small delay to ensure proper touch handling
+                    setTimeout(() => {
+                        handleFormatting.call(this, e);
+                    }, 10);
                 });
             }
         });
         
-        // Listen for focus to ensure formatting continues after clicking elsewhere
+        // Enhanced selection tracking for mobile
         noteContent.addEventListener('focus', applyActiveFormattingToSelection);
+        noteContent.addEventListener('keyup', updateToolbarState);
+        noteContent.addEventListener('mouseup', updateToolbarState);
+        noteContent.addEventListener('click', updateToolbarState);
+        
+        // Add touch event handlers for mobile
+        noteContent.addEventListener('touchend', function(e) {
+            // Small delay to let the browser process the touch
+            setTimeout(updateToolbarState, 100);
+        });
+        
+        // Handle selection changes on mobile
+        document.addEventListener('selectionchange', function() {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0 && 
+                noteContent.contains(selection.anchorNode)) {
+                // Only update if selection is within our editor
+                setTimeout(updateToolbarState, 10);
+            }
+        });
     }
     
     /**
@@ -199,35 +380,94 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Only continue if we have active formatting
             if (hasActiveFormatting) {
-                // Check if we're not already inside a formatted element
-                let currentNode = range.startContainer;
+                // Create a placeholder for formatting
+                const temp = document.createElement('span');
+                temp.setAttribute('id', 'temp-formatting');
+                temp.textContent = '\u200B'; // Zero-width space
                 
-                // If text node, get its parent
-                if (currentNode.nodeType === 3) {
-                    currentNode = currentNode.parentNode;
-                }
+                // Insert the placeholder
+                range.insertNode(temp);
                 
-                // Create marker for formatting
-                const marker = document.createElement('span');
-                marker.textContent = '\u200B'; // Zero-width space
+                // Create a new range that selects the placeholder
+                const tempRange = document.createRange();
+                tempRange.selectNodeContents(temp);
+                selection.removeAllRanges();
+                selection.addRange(tempRange);
                 
-                // Insert marker at current position
-                range.insertNode(marker);
-                
-                // Apply each active formatting to the marker
+                // Apply each active formatting
                 Object.keys(activeFormattingStates).forEach(cmd => {
-                    if (activeFormattingStates[cmd] && 
-                        ['bold', 'italic', 'underline'].includes(cmd)) {
+                    if (activeFormattingStates[cmd]) {
                         document.execCommand(cmd, false, null);
                     }
                 });
                 
-                // Move cursor after marker
-                range.setStartAfter(marker);
-                range.setEndAfter(marker);
+                // Remove the placeholder but keep the formatting
+                const parent = temp.parentNode;
+                while (temp.firstChild) {
+                    parent.insertBefore(temp.firstChild, temp);
+                }
+                parent.removeChild(temp);
+                
+                // Move cursor to the end of the formatted area
+                const newRange = document.createRange();
+                newRange.setStartAfter(parent.lastChild);
+                newRange.collapse(true);
                 selection.removeAllRanges();
-                selection.addRange(range);
+                selection.addRange(newRange);
             }
+        }
+    }
+
+    function initMobileOptimizations() {
+        // Check if device is mobile
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        if (isMobile) {
+            // Add mobile-specific class to body for CSS targeting
+            document.body.classList.add('mobile-device');
+            
+            // Increase toolbar button size for better touch targets
+            const toolbarItems = document.querySelectorAll('.toolbar-item');
+            toolbarItems.forEach(item => {
+                item.classList.add('mobile-toolbar-item');
+            });
+            
+            // Add extra padding to editor for better typing experience
+            noteContent.classList.add('mobile-editor');
+            
+            // Prevent zoom on input focus for iOS devices
+            const metaViewport = document.querySelector('meta[name=viewport]');
+            if (metaViewport) {
+                metaViewport.content = 'width=device-width, initial-scale=1, maximum-scale=1';
+            } else {
+                const newMetaViewport = document.createElement('meta');
+                newMetaViewport.name = 'viewport';
+                newMetaViewport.content = 'width=device-width, initial-scale=1, maximum-scale=1';
+                document.head.appendChild(newMetaViewport);
+            }
+            
+            // Add special handlers for soft keyboard issues
+            window.addEventListener('resize', handleKeyboardVisibilityChange);
+        }
+    }
+    
+    /**
+     * Handle keyboard visibility changes on mobile
+     */
+    function handleKeyboardVisibilityChange() {
+        // This is a simple approach - keyboard visibility changes window height
+        const toolbar = document.querySelector('.formatting-toolbar');
+        const editorContent = document.querySelector('.editor-content');
+        
+        // If keyboard is likely visible (window height decreased significantly)
+        if (window.innerHeight < window.outerHeight * 0.8) {
+            // Adjust UI for keyboard visibility
+            toolbar.classList.add('keyboard-visible');
+            editorContent.classList.add('keyboard-visible');
+        } else {
+            // Restore UI when keyboard is hidden
+            toolbar.classList.remove('keyboard-visible');
+            editorContent.classList.remove('keyboard-visible');
         }
     }
     
