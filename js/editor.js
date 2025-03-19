@@ -32,6 +32,9 @@ document.addEventListener('DOMContentLoaded', function() {
         loadNoteData();
         setupAutoSave();
         setupActiveButtonState();
+
+        // Установить цвет текста на желтый
+        noteContent.style.color = '#FFFF00';
     }
     
     /**
@@ -457,11 +460,11 @@ document.addEventListener('DOMContentLoaded', function() {
         optionsMenu.innerHTML = `
             <div class="option-item change-color">Change Color</div>
             <div class="color-picker">
-                <div class="color-option" data-color=""></div>
-                <div class="color-option color-pink" data-color="note-pink"></div>
-                <div class="color-option color-blue" data-color="note-blue"></div>
-                <div class="color-option color-green" data-color="note-green"></div>
-                <div class="color-option color-yellow" data-color="note-yellow"></div>
+                <div class="color-option" data-bg-color="#ffffff" data-shadow="none"></div>
+                <div class="color-option color-pink" data-bg-color="#5c2739" data-shadow="0 4px 12px rgba(244, 67, 54, 0.3)"></div>
+                <div class="color-option color-blue" data-bg-color="#1a365d" data-shadow="0 4px 12px rgba(33, 150, 243, 0.3)"></div>
+                <div class="color-option color-green" data-bg-color="#1e4620" data-shadow="0 4px 12px rgba(76, 175, 80, 0.3)"></div>
+                <div class="color-option color-yellow" data-bg-color="#553c00" data-shadow="0 4px 12px rgba(255, 235, 59, 0.3)"></div>
             </div>
             <div class="option-item delete-note">Delete Note</div>
         `;
@@ -470,19 +473,26 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Mark current color as selected
         if (currentNoteColor) {
-            const currentOption = optionsMenu.querySelector(`[data-color="${currentNoteColor}"]`);
+            const currentOption = optionsMenu.querySelector(`[data-bg-color="${currentNoteColor.bgColor}"]`);
             if (currentOption) {
                 currentOption.classList.add('selected');
             }
         } else {
-            optionsMenu.querySelector('[data-color=""]').classList.add('selected');
+            optionsMenu.querySelector('[data-bg-color="#ffffff"]').classList.add('selected');
         }
         
         // Add color picker event listeners
         optionsMenu.querySelectorAll('.color-option').forEach(option => {
             option.addEventListener('click', function() {
-                const color = this.getAttribute('data-color');
-                changeNoteColor(color);
+                const bgColor = this.getAttribute('data-bg-color');
+                const shadow = this.getAttribute('data-shadow');
+                const colorName = this.classList.contains('color-pink') ? 'pink' : 
+                                  this.classList.contains('color-blue') ? 'blue' :
+                                  this.classList.contains('color-green') ? 'green' :
+                                  this.classList.contains('color-yellow') ? 'yellow' : '';
+                                  
+                changeNoteColorDirectly(bgColor, shadow, colorName);
+                
                 optionsMenu.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
                 this.classList.add('selected');
             });
@@ -507,7 +517,108 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    /**
+ * Change note color directly using inline styles
+ * @param {string} bgColor Background color value
+ * @param {string} shadow Box shadow value
+ * @param {string} colorName Color name for reference (pink, blue, etc.)
+ */
+function changeNoteColorDirectly(bgColor, shadow, colorName) {
+    const editorContent = document.querySelector('.editor-content');
     
+    // Apply styles directly to the element
+    editorContent.style.backgroundColor = bgColor;
+    editorContent.style.boxShadow = shadow === 'none' ? '' : shadow;
+    
+    // Store color information as an object instead of class name
+    currentNoteColor = {
+        bgColor: bgColor,
+        shadow: shadow,
+        name: colorName
+    };
+    
+    // Auto-save after color change
+    saveCurrentNote();
+}
+
+function saveCurrentNote() {
+    const title = noteTitle.value.trim();
+    const content = noteContent.innerHTML.trim();
+    
+    // Only save if there's content
+    if (title || content) {
+        const note = {
+            id: currentNoteId || Date.now().toString(),
+            title: title || 'Untitled',
+            content: content,
+            color: currentNoteColor, // Now an object with bgColor, shadow, and name
+            timestamp: Date.now()
+        };
+        
+        const savedId = StorageManager.saveNote(note);
+        currentNoteId = savedId;
+        
+        // Update session storage
+        sessionStorage.setItem('editNoteId', savedId);
+    }
+}
+function loadNoteData() {
+    if (currentNoteId) {
+        const note = StorageManager.getNoteById(currentNoteId);
+        
+        if (note) {
+            noteTitle.value = note.title || '';
+            noteContent.innerHTML = note.content || '';
+            
+            // Handle color data for compatibility with both formats
+            if (note.color) {
+                if (typeof note.color === 'object') {
+                    // New format (object with bgColor and shadow)
+                    currentNoteColor = note.color;
+                    
+                    // Apply styles directly
+                    const editorContent = document.querySelector('.editor-content');
+                    editorContent.style.backgroundColor = note.color.bgColor;
+                    editorContent.style.boxShadow = note.color.shadow === 'none' ? '' : note.color.shadow;
+                } else {
+                    // Old format (string with class name)
+                    // Try to convert old format to new
+                    convertOldColorFormat(note.color);
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Convert old color format (class name) to new format (object with bgColor and shadow)
+ * @param {string} oldColorClass Old color class name
+ */
+function convertOldColorFormat(oldColorClass) {
+    const colorMap = {
+        'note-pink': { bgColor: '#5c2739', shadow: '0 4px 12px rgba(244, 67, 54, 0.3)', name: 'pink' },
+        'note-blue': { bgColor: '#1a365d', shadow: '0 4px 12px rgba(33, 150, 243, 0.3)', name: 'blue' },
+        'note-green': { bgColor: '#1e4620', shadow: '0 4px 12px rgba(76, 175, 80, 0.3)', name: 'green' },
+        'note-yellow': { bgColor: '#553c00', shadow: '0 4px 12px rgba(255, 235, 59, 0.3)', name: 'yellow' }
+    };
+    
+    if (colorMap[oldColorClass]) {
+        currentNoteColor = colorMap[oldColorClass];
+        
+        // Apply styles directly
+        const editorContent = document.querySelector('.editor-content');
+        editorContent.style.backgroundColor = currentNoteColor.bgColor;
+        editorContent.style.boxShadow = currentNoteColor.shadow;
+    } else {
+        // Default (no color)
+        currentNoteColor = { bgColor: '#ffffff', shadow: 'none', name: '' };
+        
+        const editorContent = document.querySelector('.editor-content');
+        editorContent.style.backgroundColor = '#ffffff';
+        editorContent.style.boxShadow = '';
+    }
+}
     /**
      * Change note color
      * @param {string} color Color class name

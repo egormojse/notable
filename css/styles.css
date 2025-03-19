@@ -209,28 +209,26 @@ header h1 {
     overflow-y: auto;
     padding: 16px;
 }
-
-/* Note with Colors - grayscale variants but softer */
+/* Note with Colors - лучшая видимость для желтого и белого текста */
 .note-pink {
-    background-color: #ffebee;  /* Light pink */
-    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.1);
+    background-color: #5c2739;  /* Темно-бордовый */
+    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
 }
 
 .note-blue {
-    background-color: #e3f2fd;  /* Light blue */
-    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.1);
+    background-color: #1a365d;  /* Темно-синий */
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
 }
 
 .note-green {
-    background-color: #e8f5e9;  /* Light green */
-    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.1);
+    background-color: #1e4620;  /* Темно-зеленый */
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
 }
 
 .note-yellow {
-    background-color: #fffde7;  /* Light yellow */
-    box-shadow: 0 4px 12px rgba(255, 235, 59, 0.1);
+    background-color: #553c00;  /* Темно-коричневый */
+    box-shadow: 0 4px 12px rgba(255, 235, 59, 0.3);
 }
-
 
 /* Editor Styles */
 .editor-container {
@@ -372,21 +370,20 @@ header h1 {
 }
 
 .color-pink {
-    background-color: #f48fb1;  /* Pink */
+    background-color: #5c2739;  /* Темно-бордовый */
 }
 
 .color-blue {
-    background-color: #90caf9;  /* Blue */
+    background-color: #1a365d;  /* Темно-синий */
 }
 
 .color-green {
-    background-color: #a5d6a7;  /* Green */
+    background-color: #1e4620;  /* Темно-зеленый */
 }
 
 .color-yellow {
-    background-color: #fff59d;  /* Yellow */
+    background-color: #553c00;  /* Темно-коричневый */
 }
-
 /* Delete Confirmation */
 .delete-confirm {
     position: fixed;
@@ -682,22 +679,22 @@ header h1 {
 /* Additional color styles - grayscale with soft shadows */
 .dark-mode .note-pink {
     background-color: #4a0015;  /* Dark pink */
-    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.2);
+    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
 }
 
 .dark-mode .note-blue {
     background-color: #0d47a1;  /* Dark blue */
-    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
 }
 
 .dark-mode .note-green {
     background-color: #1b5e20;  /* Dark green */
-    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
 }
 
 .dark-mode .note-yellow {
     background-color: #f57f17;  /* Dark yellow/amber */
-    box-shadow: 0 4px 12px rgba(255, 235, 59, 0.2);
+    box-shadow: 0 4px 12px rgba(255, 235, 59, 0.3);
 }
 
 /* Accessibility enhancements */

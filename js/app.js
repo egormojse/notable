@@ -59,8 +59,17 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     function createNoteElement(note) {
         const noteElement = document.createElement('div');
-        noteElement.className = `note-card ${note.color || ''}`;
+        noteElement.className = 'note-card';
         noteElement.dataset.noteId = note.id;
+        
+        // Apply color styles directly if available in the new format
+        if (note.color && typeof note.color === 'object') {
+            noteElement.style.backgroundColor = note.color.bgColor;
+            noteElement.style.boxShadow = note.color.shadow === 'none' ? '' : note.color.shadow;
+        } else if (note.color && typeof note.color === 'string') {
+            // Backward compatibility for old color format
+            noteElement.classList.add(note.color);
+        }
         
         const title = note.title || 'Untitled';
         const content = note.content || '';
@@ -158,8 +167,17 @@ document.addEventListener('DOMContentLoaded', function() {
         
         results.forEach(note => {
             const resultItem = document.createElement('div');
-            resultItem.className = `note-card ${note.color || ''}`;
+            resultItem.className = 'note-card';
             resultItem.dataset.noteId = note.id;
+            
+            // Apply color styles directly if available in the new format
+            if (note.color && typeof note.color === 'object') {
+                resultItem.style.backgroundColor = note.color.bgColor;
+                resultItem.style.boxShadow = note.color.shadow === 'none' ? '' : note.color.shadow;
+            } else if (note.color && typeof note.color === 'string') {
+                // Backward compatibility for old color format
+                resultItem.classList.add(note.color);
+            }
             
             const title = note.title || 'Untitled';
             const content = note.content || '';
